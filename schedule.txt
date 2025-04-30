@@ -23,3 +23,24 @@
 系统服务启动与用户交互阶段
     1. 内核初始化完成后，启动各种系统服务和守护进程
     2. 操作系统显示登录界面，等待用户登录，运行程序
+
+kernel.ld
+boot_first_cpu.S 
+boot_append_cpu.S 
+bootmain.c
+
+spinlock.h 
+spinlock.c
+sleeplock.h
+
+param.h
+types.h
+
+allocator.c
+asm.h
+buffer.h
+elf.h 
+entry.S
+memlayout.h
+
+add disk.h file.h

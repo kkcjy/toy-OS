@@ -1,5 +1,6 @@
 #include "types.h"
 #include "sleeplock.h"
+#include "disk.h"
 
 
 // buffer of disk to reduce the operation of I/O

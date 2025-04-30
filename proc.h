@@ -75,7 +75,7 @@ struct Proc {
     char name[16];               // process name (debugging)
 };
 
-void ptable_init(void);
+void process_t_init(void);
 int get_cpu_id();
 struct CPU* get_cpu(void);
 struct Proc* get_proc(void);

@@ -7,10 +7,10 @@
 
 
 // process table
-struct Ptable {
+struct Process_t {
     struct Spinlock lock;
     struct Proc proc[NPROC];
-} ptable;
+} process_t;
 
 static struct Proc *initproc;
 
@@ -23,8 +23,8 @@ extern void trapret(void);
 
 // static void wakeup1(void *chan);
 
-void ptable_init(void) {
-    init_lock(&ptable.lock, "ptable");
+void process_t_init(void) {
+    init_lock(&process_t.lock, "process_t");
 }
 
 // Must be called with interrupts disabled
@@ -62,7 +62,7 @@ struct Proc* get_proc(void) {
 }
 
 /*
-look in ptable for an UNUSED pproc
+look in process_t for an UNUSED pproc
 if found, change state to EMBRYO and initialize state required to run in the kernel
 otherwise return 0
 */
@@ -70,14 +70,14 @@ static struct Proc* allocproc(void) {
     struct Proc *p;
     char *temp_kstack_addr_index;
 
-    acquire(&ptable.lock);
+    acquire(&process_t.lock);
 
     // no UNUSED proc found
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    for(p = process_t.proc; p < &process_t.proc[NPROC]; p++)
         if(p->state == UNUSED)
             goto found;
 
-    release(&ptable.lock);
+    release(&process_t.lock);
     return 0;
 
     // UNUSED proc found
@@ -85,7 +85,7 @@ found:
     p->state = EMBRYO;
     p->pid = nextpid++;
     
-    release(&ptable.lock);
+    release(&process_t.lock);
 
     // allocate kernel stack
     if((p->kstack = kalloc()) == 0){
@@ -138,11 +138,11 @@ void userinit(void) {
     safestrcpy(p->name, "initcode", sizeof(p->name));
     // p->cwd = namei("/");
 
-    acquire(&ptable.lock);
+    acquire(&process_t.lock);
 
     p->state = RUNNABLE;
   
-    release(&ptable.lock);
+    release(&process_t.lock);
 }
 
 
