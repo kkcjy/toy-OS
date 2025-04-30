@@ -3,6 +3,9 @@
 #include "sleeplock.h"
 
 
+#define CONSOLE 1           // major device number of the console device
+
+
 struct File {
     enum { FD_NONE, FD_PIPE, FD_INODE } type;
     int ref;                // reference count
@@ -31,4 +34,11 @@ struct Devswitch_t {
   
 extern struct Devswitch_t devswitch[];          // store different read and write functions
 
-#define CONSOLE 1                               // major device number of the console device
+
+void fileinit(void);
+struct File* filealloc(void);
+struct File* filedup(struct File *f);
+void fileclose(struct File *f);
+int filedata(struct File *f);
+int fileread(struct File *f, char *addr, int n);
+int filewrite(struct File *f, char *addr, int n);

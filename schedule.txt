@@ -24,23 +24,28 @@
     1. 内核初始化完成后，启动各种系统服务和守护进程
     2. 操作系统显示登录界面，等待用户登录，运行程序
 
-kernel.ld
-boot_first_cpu.S 
-boot_append_cpu.S 
-bootmain.c
+kernel.ld           32 位 x86 ELF 链接脚本，设格式、架构、入口，规划段布局，定起止符，对齐地址，弃特定段
+asm.h               定义空段描述符、完整段描述符和段属性
+elf.h               ELFhdr + Proghdr
+boot_first_cpu.S    启动首个 CPU 并切换到 32 位保护模式
+boot_append_cpu.S   启动其他 CPU
+bootmain.c          从磁盘加载 ELF 格式内核镜像，校验格式后将各段加载到内存，处理额外内存清零，最后跳转至内核入口点执行
+entry.S             xv6 内核的起始部分，设置 Multiboot 头，指定 ELF 入口，开启 4MB 页面扩展和分页功能，设置栈指针，跳转到 main() 
 
-spinlock.h 
-spinlock.c
-sleeplock.h
+disk.h 
+buffer.h
+file.h
+
+spinlock.h          自旋锁
+spinlock.c          自旋锁功能实现
+sleeplock.h         睡眠锁
 
 param.h
 types.h
 
 allocator.c
-asm.h
-buffer.h
-elf.h 
-entry.S
 memlayout.h
 
-add disk.h file.h
+
+
+add file.c string.c x86.h

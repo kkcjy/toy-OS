@@ -10,7 +10,7 @@ struct CPU {
     uchar apicid;                // local APIC ID
     // struct context *scheduler;   // swtch() here to enter scheduler
     // struct taskstate ts;         // Used by x86 to find stack for interrupt
-    struct segdesc gdt[NSEGS];   // x86 global descriptor table
+    struct Segdesc gdt[NSEGS];   // x86 global descriptor table
     // volatile uint started;       // Has the CPU started?
     int ncli;                    // depth of pushcli
     int intena;                  // the initial state of interrupt enablement

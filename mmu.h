@@ -13,7 +13,7 @@
 
 #ifndef __ASSEMBLER__
 // Segment Descriptor
-struct segdesc {
+struct Segdesc {
     uint lim_15_0 : 16;                     // low bits of segment limit
     uint base_15_0 : 16;                    // low bits of segment base address
     uint base_23_16 : 8;                    // middle bits of segment base address
@@ -29,6 +29,10 @@ struct segdesc {
     uint base_31_24 : 8;                    // High bits of segment base address
 };
 #endif
+
+struct Gatedesc {
+
+};
 
 #define DPL_USER        0x3                 // User DPL
 

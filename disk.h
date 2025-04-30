@@ -49,6 +49,10 @@ struct Superblock {
     uint bmapstart;         // block number of first free map block
 };
 
+// #define T_DIR  1        // Directory
+// #define T_FILE 2        // File
+// #define T_DEV  3        // Device
+
 // for identify and manage files
 struct Diskinode {
     short type;             // file type

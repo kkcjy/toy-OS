@@ -1,12 +1,7 @@
 #include "types.h"
 
-// 读取当前处理器的标志寄存器
-static inline uint readeflags(void) {
-    uint eflags;
-    asm volatile("pushfl; popl %0" : "=r" (eflags));
-    return eflags;
-}
 
+// ------------------------------------------------ 中断
 // 禁用处理器的外部可屏蔽中断
 static inline void cli(void) {
     asm volatile("cli");
@@ -16,8 +11,10 @@ static inline void cli(void) {
 static inline void sti(void) {
     asm volatile("sti");
 }
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 中断
 
-// 从指定的 I/O 端口(port)读取 8-bit 的数据
+// ------------------------------------------------ I/O 
+// 从指定的 I/O 端口(port)读取 8-bit 数据
 static inline uchar inb(ushort port) {
     uchar data;
     asm volatile("in %1,%0" : "=a" (data) : "d" (port));
@@ -42,18 +39,28 @@ static inline void outw(ushort port, ushort data) {
     asm volatile("out %0,%1" : : "a" (data), "d" (port));
 }
 
-// newval -> addr 并 return oldval
+// 向指定的 I/O 端口(port)输出 32-bit 数据(data)
+static inline void outsl(int port, const void *addr, int cnt) {
+    asm volatile("cld; rep outsl" :
+                "=S" (addr), "=c" (cnt) :
+                "d" (port), "0" (addr), "1" (cnt) :
+                "cc");
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I/O
+
+
+// ------------------------------------------------ MEM
+// 原子性交换内存地址 addr 处的值与 newval，并返回该内存地址的旧值
 static inline uint xchg(volatile uint *addr, uint newval) {
     uint result;
-
-    // The + in "+m" denotes a read-modify-write operand
+    // The + in "+m" denotes a read-modify-write operand.
     asm volatile("lock; xchgl %0, %1" :
-                "+m" (*addr), "=a" (result) :
-                "1" (newval) :
-                "cc");
+                 "+m" (*addr), "=a" (result) :
+                 "1" (newval) :
+                 "cc");
     return result;
 }
-
+  
 // 将 8-bit 的数据(data)重复(cnt)存储到指定的内存区域(addr)
 static inline void stosb(void *addr, int data, int cnt) {
     asm volatile("cld; rep stosb" :
@@ -61,6 +68,73 @@ static inline void stosb(void *addr, int data, int cnt) {
                 "0" (addr), "1" (cnt), "a" (data) :
                 "memory", "cc");
 }
+// 将 32-bit 的数据(data)重复(cnt)存储到指定的内存区域(addr)
+static inline void
+stosl(void *addr, int data, int cnt)
+{
+  asm volatile("cld; rep stosl" :
+               "=D" (addr), "=c" (cnt) :
+               "0" (addr), "1" (cnt), "a" (data) :
+               "memory", "cc");
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MEM
+
+// ------------------------------------------------ register
+struct Segdesc;
+// 将全局描述符表(GDT)的基地址和界限信息存入数组并加载到全局描述符表寄存器(GDTR)中
+static inline void lgdt(struct Segdesc *p, int size) {
+  volatile ushort pd[3];
+
+  pd[0] = size-1;
+  pd[1] = (uint)p;
+  pd[2] = (uint)p >> 16;
+
+  asm volatile("lgdt (%0)" : : "r" (pd));
+}
+
+struct Gatedesc;
+// 将中断描述符表(IDT)的基地址和界限信息存入数组并加载到中断描述符表寄存器(IDTR)中
+static inline void lidt(struct Gatedesc *p, int size) {
+  volatile ushort pd[3];
+
+  pd[0] = size-1;
+  pd[1] = (uint)p;
+  pd[2] = (uint)p >> 16;
+
+  asm volatile("lidt (%0)" : : "r" (pd));
+}
+
+// 将 16 位选择子(sel)加载到任务寄存器(TR)中，以指定当前任务状态段
+static inline void ltr(ushort sel) {
+  asm volatile("ltr %0" : : "r" (sel));
+}
+
+// 读取标志寄存器(EFLAGS)的值并将其作为 32 位无符号整数返回
+static inline uint readeflags(void) {
+  uint eflags;
+  asm volatile("pushfl; popl %0" : "=r" (eflags));
+  return eflags;
+}
+
+// 将 16 位值(v)加载到段寄存器(GS)中，可用于设置特定的段地址
+static inline void loadgs(ushort v) {
+  asm volatile("movw %0, %%gs" : : "r" (v));
+}
+
+// 读取控制寄存器 CR2 的值，并将其作为 32 位无符号整数返回
+static inline uint rcr2(void) {
+    uint val;
+    asm volatile("movl %%cr2,%0" : "=r" (val));
+    return val;
+  }
+  
+// 将给定的 32 位值 val 加载到控制寄存器 CR3 中
+static inline void lcr3(uint val) {
+asm volatile("movl %0,%%cr3" : : "r" (val));
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ register
+
+
 
 // trapframe built on stack
 struct trapframe {

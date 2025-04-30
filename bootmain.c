@@ -1,6 +1,6 @@
 /*  ···加载流程···
-    与 bootset.S 共同构成 boot 程序
-    bootset.S 调用 bootmain()
+    与 boot_first_cpu.S 共同构成 boot 程序
+    boot_first_cpu.S 调用 bootmain()
     bootmain() 从磁盘首个扇区开始加载一个 ELF 格式的内核镜像，然后跳转到内核入口
 */
 #pragma once
